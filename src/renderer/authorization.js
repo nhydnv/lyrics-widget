@@ -1,6 +1,8 @@
 /*
 ---------- Constants ----------
 */
+let clientId;
+let redirectUri;
 const authorizationEndpoint = "https://accounts.spotify.com/authorize";
 const tokenEndpoint = "https://accounts.spotify.com/api/token";
 const scope = 'user-read-playback-state user-modify-playback-state user-read-currently-playing streaming';
@@ -139,46 +141,44 @@ const base64encode = (input) => {
 /*
 ---------- Authorisation script ----------
 */
-const btn = document.getElementById('btn')
-let clientId;
-let redirectUri;
-btn.addEventListener('click', async () => {
-  clientId = await window.spotify.getClientId();
-  redirectUri = await window.spotify.getRedirectUri();
-  loginWithSpotifyClick();
-})
+export const authorize = () => {
+  const btn = document.getElementById('btn')
+  btn.addEventListener('click', async () => {
+    clientId = await window.spotify.getClientId();
+    redirectUri = await window.spotify.getRedirectUri();
+    loginWithSpotifyClick();
+  })
 
-// On redirect, receive authorisation code and state sent by the main process
-window.spotify.onAuthCode(async (data) => {
-  const code = data['code'];
-  const state = data['state'];
-  // If a code is found, we're in a callback, do a token exchange
-  if (code) {
-    // Compare the state parameter received in the redirection URI
-    // with the state parameter originally provided to Spotify in the authorization URI
-    const storedState = window.localStorage.getItem('state');
-    if (state != storedState) {
-      console.error("State mismatch.");
-      throw new Error("State mismatch.");
+  // On redirect, receive authorisation code and state sent by the main process
+  window.spotify.onAuthCode(async (data) => {
+    const code = data['code'];
+    const state = data['state'];
+
+    // If a code is found, we're in a callback, do a token exchange
+    if (code) {
+      // Compare the state parameter received in the redirection URI
+      // with the state parameter originally provided to Spotify in the authorization URI
+      const storedState = window.localStorage.getItem('state');
+      if (state != storedState) {
+        console.error("State mismatch.");
+        throw new Error("State mismatch.");
+      }
+
+      await getToken(code);
+
+      // Remove query parameters from URL so we can refresh correctly
+      const url = new URL(window.location.href);
+      url.searchParams.delete("code");
+      url.searchParams.delete("state");
+
+      const updatedUrl = url.search ? url.href : url.href.replace('?', '');
+      window.history.replaceState({}, "", updatedUrl);
+
+      // If we have a token (we're logged in), fetch user data 
+      if (currentToken.access_token) {
+        const userData = await getUserData();
+      }
     }
-
-    await getToken(code);
-
-    // Remove query parameters from URL so we can refresh correctly
-    const url = new URL(window.location.href);
-    url.searchParams.delete("code");
-    url.searchParams.delete("state");
-
-    const updatedUrl = url.search ? url.href : url.href.replace('?', '');
-    window.history.replaceState({}, "", updatedUrl);
-
-    // If we have a token (we're logged in), fetch user data 
-    if (currentToken.access_token) {
-      const userData = await getUserData();
-    }
-    // Otherwise, go back to log-in page
-    else {
-
-    }
-  }
-})
+    window.spotify.closeAuthWindow();
+  })
+}

@@ -1,12 +1,14 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const http = require('http');
 const path = require('node:path');
+const { readFile } = require('node:fs/promises');
 require('dotenv').config({ 
   path: path.join(__dirname, '../../.env'),
   quiet: true, 
 });
 
 let mainWindow;
+let authWindow;
 
 /*
 const protocol = "myapp";
@@ -28,7 +30,7 @@ const createWindow = () => {
 }
 
 const handleOpenAuthWindow = (event, url) => {
-  let authWindow = new BrowserWindow({
+  authWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -38,14 +40,17 @@ const handleOpenAuthWindow = (event, url) => {
   });
 
   authWindow.loadURL(url);
+}
+
+const handleCloseAuthWindow = (event) => {
+  authWindow.close();
 
   // Clean up reference when closed
   authWindow.on('closed', () => { authWindow = null; });
-  return authWindow;
 }
 
 // Create a server to redirect to after user authorised with Spotify
-const createAuthServer = () => {
+const createAuthServer = (event) => {
   const server = http.createServer((req, res) => {
     const url = new URL(req.url, redirectUri);
 
@@ -53,10 +58,6 @@ const createAuthServer = () => {
       // Get code and state in the query parameters
       const code = url.searchParams.get("code");
       const state = url.searchParams.get("state");
-
-      // Send response headers to the user's browser
-      res.writeHead(200, { "Content-Type": "text/html" });
-      res.end("<h1>You may now close this window.</h1>");
 
       mainWindow.webContents.send("auth-code", { code, state });
     }
@@ -67,13 +68,20 @@ const createAuthServer = () => {
   });
 }
 
+const loadPage = async (event, relativePath) => {
+  const fullPath = path.join(__dirname, "../renderer", relativePath);
+  return readFile(fullPath, "utf8");
+}
+
 // Create the main window
 app.whenReady().then(() => {
   ipcMain.handle('get-client-id', () => {
     return process.env.SPOTIFY_CLIENT_ID;
   });
   ipcMain.handle('get-redirect-uri', () => redirectUri);
+  ipcMain.handle('load-page', loadPage);
   ipcMain.on('open-auth-window', handleOpenAuthWindow);
+  ipcMain.on('close-auth-window', handleCloseAuthWindow);
   createWindow();
   createAuthServer();
 
