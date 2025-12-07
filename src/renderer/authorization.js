@@ -58,7 +58,7 @@ const refreshToken = async () => {
 const startRefreshToken = async () => {
   // Check every 30 seconds
   setInterval(async () => {
-    const timeLeft = currentToken.expires - Date.now();
+    const timeLeft = new Date(currentToken.expires).getTime() - Date.now()
 
     // Refresh if there is less than 2 minutes left
     if (timeLeft < TOKEN_MIN_TIME_LEFT) {

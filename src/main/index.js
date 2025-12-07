@@ -1,29 +1,26 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-const http = require('http');
 const path = require('node:path');
+const http = require('http');
 const { readFile } = require('node:fs/promises');
-require('dotenv').config({ 
-  path: path.join(__dirname, '../../.env'),
-  quiet: true, 
-});
+const { handleCloseAuthWindow, handleRedirectToSpotifyAuthorize,
+         handleGetToken, handleRefreshToken
+} = require('./authorization');
+const { redirectUri } = require('./config');
 
 let mainWindow;
-let authWindow;
+
+const MAIN_WINDOW_WIDTH = 600;
+const MAIN_WINDOW_HEIGHT = 300;
 
 /*
 const protocol = "myapp";
 const redirectUri = `${protocol}://callback`;
 */
-const clientId = process.env.SPOTIFY_CLIENT_ID;
-const redirectUri = `http://127.0.0.1:8080/callback`;
-const tokenEndpoint = "https://accounts.spotify.com/api/token";
-const authorizationEndpoint = "https://accounts.spotify.com/authorize";
-const scope = 'user-read-playback-state user-modify-playback-state user-read-currently-playing streaming';
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: MAIN_WINDOW_WIDTH,
+    height: MAIN_WINDOW_HEIGHT,
     webPreferences: {
       contextIsolation: true,
       preload: path.join(__dirname, '../preload/preload.js'),
@@ -33,9 +30,6 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 }
 
-/*
----------- Spotify OAuth window ----------
-*/
 // Create a server to redirect to after user authorised with Spotify
 const createAuthServer = (event) => {
   const server = http.createServer((req, res) => {
@@ -55,74 +49,6 @@ const createAuthServer = (event) => {
   });
 }
 
-const openAuthWindow = (url) => {
-  authWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      contextIsolation: true,
-      preload: path.join(__dirname, '../preload/preload.js'),
-    },
-  });
-
-  authWindow.loadURL(url);
-}
-
-const handleCloseAuthWindow = event => { authWindow.close(); }
-
-const handleGetToken = async (event, code, codeVerifier) => {
-  const url = tokenEndpoint;
-  const payload = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      client_id: clientId,
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri: redirectUri,
-      code_verifier: codeVerifier,
-    }),
-  }
-
-  const response = await fetch(url, payload);
-  return await response.json();
-}
-
-// Refresh token once the current access token expires
-const handleRefreshToken = async (refreshToken) => {
-  const response = await fetch(tokenEndpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: new URLSearchParams({
-      client_id: clientId,
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-    }),
-  });
-  return await response.json();
-}
-
-const handleRedirectToSpotifyAuthorize = async (event, codeChallenge, state) =>  {
-  const authUrl = new URL(authorizationEndpoint);
-
-  const params =  {
-      response_type: 'code',
-      client_id: clientId,
-      scope,
-      code_challenge_method: 'S256',
-      code_challenge: codeChallenge,
-      redirect_uri: redirectUri,
-      state: state,
-  }
-
-  authUrl.search = new URLSearchParams(params).toString();
-  openAuthWindow(authUrl.toString());
-}
-
 const loadPage = async (event, relativePath) => {
   const fullPath = path.join(__dirname, "../renderer", relativePath);
   return readFile(fullPath, "utf8");
@@ -137,8 +63,13 @@ app.whenReady().then(() => {
 
   ipcMain.handle('load-page', loadPage);
   createWindow();
-  createAuthServer();
+  if (createAuthServer()) {
+    mainWindow.webContents.send("auth-code", { code, state });
+  }
 
+  mainWindow.setMenuBarVisibility(false);
+
+  // Open a window if none are open in MacOS
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
