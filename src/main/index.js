@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 const http = require('http');
 const { readFile } = require('node:fs/promises');
-const { handleCloseAuthWindow, handleRedirectToSpotifyAuthorize,
+const { getAuthWindow, handleCloseAuthWindow, handleRedirectToSpotifyAuthorize,
          handleGetToken, handleRefreshToken
 } = require('./authorization');
 const { redirectUri } = require('./config');
@@ -28,6 +28,11 @@ const createWindow = () => {
   });
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+
+  mainWindow.on('closed', () => {
+    const authWindow = getAuthWindow();
+    if (authWindow) { authWindow.close(); }
+  });
 }
 
 // Create a server to redirect to after user authorised with Spotify

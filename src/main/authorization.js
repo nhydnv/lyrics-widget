@@ -93,6 +93,7 @@ const handleRedirectToSpotifyAuthorize = async (event, codeChallenge, state) => 
 }
 
 module.exports = {
+  getAuthWindow: () => authWindow,
   handleCloseAuthWindow,
   handleRedirectToSpotifyAuthorize,
   handleGetToken,
