@@ -3,6 +3,7 @@ const { getCookies } = require('./authorization');
 
 const api = "https://api.spotify.com/v1";
 let page;
+let lyricsCache = new Map();
 
 const openWebPlayer = async (event) => {
   const cookies = getCookies();
@@ -42,18 +43,24 @@ const openWebPlayer = async (event) => {
       console.error(err);
     }
   }
+
+  page.on('response', async res => {
+    const url = res.url();
+    if (url.includes('/color-lyrics/v2/track/')) {
+      try {
+        const data = await res.json();
+        // Get track ID from request URL
+        const trackId = url.match(/track\/([^/?]+)/)?.[1];
+        if (trackId) {
+          lyricsCache.set(trackId, data);
+        }
+      } catch {}
+    }
+  });
 };
 
 const getLyrics = async (event, id) => {
   if (!page) return;
-
-  await page.setCacheEnabled(false);
-
-  const responsePromise = page.waitForResponse(res =>
-    res.url().includes(`/color-lyrics/v2/track/${id}`) &&
-    res.request().method() === 'GET' &&
-    res.status() === 200
-  );
 
   const lyricsButton = 'button[data-testid="lyrics-button"]';
 
@@ -76,20 +83,7 @@ const getLyrics = async (event, id) => {
     await page.click(lyricsButton);
   }
 
-  let lyrics;
-
-  try {
-    const response = await responsePromise;
-    lyrics = await response?.json();
-  } catch(err) {
-    if (err.name === 'TimeoutError') {
-      console.warn('Lyrics request timed out.');
-    } else {
-      throw err;
-    }
-  }
-
-  return lyrics;
+  return await waitForLyrics(id);
 }
 
 const getPlaybackState = async (event, token) => requestData(token, "/me/player");
@@ -110,6 +104,29 @@ const requestData = async (token, path) => {
     console.error(error.message);
   }
 }
+
+// Helper that waits for lyrics to be cached
+const waitForLyrics = (trackId, timeout=3000) => {
+  return new Promise((resolve) => {
+
+    // Already cached
+    if (lyricsCache.has(trackId)) {
+      return resolve(lyricsCache.get(trackId));
+    }
+
+    const start = Date.now();
+
+    const intervalId = setInterval(() => {
+      if (lyricsCache.has(trackId)) {
+        clearInterval(intervalId);
+        resolve(lyricsCache.get(trackId));
+      } else if (Date.now() - start > timeout) {
+        clearInterval(intervalId);
+        resolve(null);  // Time out: no lyrics
+      }
+    }, 50); // Poll every 50ms
+  });
+};
 
 module.exports = {
   getPlaybackState,

@@ -23,13 +23,9 @@ setInterval(async () => {
     if (trackName !== previousTrack) {
       songTitle.textContent = trackName; 
       lyrics = await window.spotify.getLyrics(trackId);
-      console.log("SONG CHANGE");
       lineIndex = 0;
     }
     previousTrack = trackName;
-
-    console.log("prev track", previousTrack);
-    console.log("current track", trackName);
 
     if (lyrics) {
       songLyrics.textContent = lyrics['lyrics']['lines'][lineIndex]['words'];
@@ -45,4 +41,4 @@ setInterval(async () => {
     // 204 no content: try relaunching spotify app
     songTitle.textContent = 'Start playing sth (or try relaunching ur spotify app)';
   }
-}, 1000);  // Query every second to detect song changes
+}, 1000);  // Poll every second to detect song changes
