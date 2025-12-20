@@ -1,4 +1,6 @@
+const { safeStorage } = require('electron');
 const puppeteer = require('puppeteer');
+const { Buffer } = require('node:buffer');
 const { getCookies } = require('./authorization');
 
 const api = "https://api.spotify.com/v1";
@@ -96,6 +98,9 @@ const getLyrics = async (event, id) => {
 const getPlaybackState = async (event, token) => requestData(token, "/me/player");
 
 const requestData = async (token, path) => {
+  if (safeStorage.isEncryptionAvailable()) {
+    token = safeStorage.decryptString(Buffer.from(token, 'base64'));
+  }
   try {
     const response = await fetch(`${api}${path}`, {
       method: "GET",

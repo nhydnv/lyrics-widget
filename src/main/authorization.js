@@ -1,6 +1,8 @@
-const { BrowserWindow, session } = require('electron');
+const { BrowserWindow, session, safeStorage } = require('electron');
+const { Buffer } = require('node:buffer');
 const path = require('node:path');
 const { clientId, redirectUri } = require('./config');
+const { ref } = require('node:process');
 
 const AUTH_WINDOW_WIDTH = 600;
 const AUTH_WINDOW_HEIGHT = 800;
@@ -58,12 +60,13 @@ const getToken = async (event, code, codeVerifier) => {
   }
 
   const response = await fetch(url, payload);
-  return await response.json();
+  return encryptToken(await response.json());
 }
 
 // Refresh token once the current access token expires
-const refreshToken = async (refreshToken) => {
+const refreshToken = async (event, refreshToken) => {
   console.log('Refreshing token...');
+  refreshToken = safeStorage.decryptString(Buffer.from(refreshToken, 'base64'));
   const response = await fetch(tokenEndpoint, {
     method: 'POST',
     headers: {
@@ -75,7 +78,16 @@ const refreshToken = async (refreshToken) => {
       refresh_token: refreshToken,
     }),
   });
-  return await response.json();
+
+  return encryptToken(await response.json());
+}
+
+const encryptToken = token => {
+  if (safeStorage.isEncryptionAvailable()) {
+    token.access_token = safeStorage.encryptString(token.access_token).toString('base64');
+    token.refresh_token = safeStorage.encryptString(token.refresh_token).toString('base64');
+  }
+  return token;
 }
 
 const redirectToSpotifyAuthorize = async (event, codeChallenge, state) =>  {

@@ -1,4 +1,4 @@
-import { currentToken, startRefreshToken } from './../authorization.js';
+import { currentToken } from './../authorization.js';
 
 const songTitle = document.getElementById('song-title');
 const songLyrics = document.getElementById('song-lyrics');

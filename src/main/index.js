@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, safeStorage } = require('electron');
 const path = require('node:path');
 const http = require('http');
 const { readFile } = require('node:fs/promises');
