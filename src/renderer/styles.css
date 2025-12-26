@@ -240,7 +240,7 @@ title-bar {
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
-  gap: 5%;
+  gap: 20%;
   align-items: center;
   flex: 0 0 auto;
   padding-bottom: 5px;

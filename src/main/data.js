@@ -14,6 +14,7 @@ const openWebPlayer = async (event) => {
   const cookies = await getCookies();
 
   const browser = await puppeteer.launch({
+    headless: false,
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
   });
   [page] = await browser.pages();
@@ -78,10 +79,12 @@ const getLyrics = async (event, id) => {
   try {
     elHandler = await page.waitForSelector(lyricsButton, { timeout: 20_000 });
   } catch {
+    console.log('1');
     return null;  // Timeout
   }
   const hasLyrics = await elHandler.evaluate(el => !el.disabled);
   if (!hasLyrics) {
+    console.log('2');
     return null;
   }
 
