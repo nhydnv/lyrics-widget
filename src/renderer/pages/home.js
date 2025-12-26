@@ -9,8 +9,18 @@ const unsyncedMsg = document.getElementById('unsynced-msg');
 let isPlaying = false;
 // Flag if user modified playback using in-app controls (as opposed to Spotify's)
 let playbackModified = true;  
+let hasPremium = true;
 const playPauseBtn = document.getElementById('play-pause');
 const playbackBtns = document.querySelectorAll('.playback-btn');
+
+// Check if user has Spotify Premium
+if (!currentToken.access_token) { throw new Error('Access token required.'); }
+const user = await window.api.getCurrentUser(currentToken.access_token);
+console.log(user);
+if (user['product'] !== 'premium') {
+  disablePlayback();
+  hasPremium = false;
+}
 
 // Find the lyrics position the user is currently at using a binary search approach
 const findLyricsPosition = (startTimes, currentTime) => {
@@ -60,7 +70,9 @@ const clampSongWidth = () => {
 }
 
 // Playback buttons enable/disable
-const enablePlayback = () => playbackBtns.forEach(btn => btn.disabled = false);
+const enablePlayback = () => { 
+  if (hasPremium) playbackBtns.forEach(btn => btn.disabled = false);
+}
 const disablePlayback = () => playbackBtns.forEach(btn => btn.disabled = true);
 
 
@@ -81,8 +93,6 @@ let lyrics;
 let startTimes = [];
 
 setInterval(async () => {
-  if (!currentToken.access_token) { throw new Error('Access token required.'); }
-
   const state = await window.api.getPlaybackState(currentToken.access_token);
   if (state) {
     enablePlayback();
@@ -90,15 +100,15 @@ setInterval(async () => {
     const trackId = state['item']['id'];
     const artists = state['item']['artists'].map(artist => artist['name']);
 
-    // Check if user modified playback using Spotify controls
-    if (!playbackModified) {
-      isPlaying = state['is_playing'];
-    }
+    if (
+      playbackModified ||               // Playback modified using in-app controls
+      isPlaying !== state['is_playing']  // Playback modified using Spotify controls
+    ) {
+      // Update isPlaying if playback modified using Spotify controls
+      if (!playbackModified) isPlaying = state['is_playing'];
+      playPauseBtn.innerHTML = isPlaying ? '<pause-button />' : '<play-button />';
+    } 
     playbackModified = false;
-    playPauseBtn.innerHTML = isPlaying ? '<pause-button />' : '<play-button />';
-
-    // Display either play or pause
-    playPauseBtn.innerHTML = isPlaying ? '<pause-button />' : '<play-button />';
 
     // On track change
     if (trackName !== previousTrack) {
@@ -123,6 +133,8 @@ setInterval(async () => {
       clampSongWidth();
     }
     previousTrack = trackName;
+
+    console.log(lyrics);
 
     if (lyrics) {
       let lineIndex = findLyricsPosition(startTimes, state['progress_ms']);

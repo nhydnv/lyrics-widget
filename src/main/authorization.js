@@ -8,7 +8,7 @@ const AUTH_WINDOW_HEIGHT = 800;
 
 const tokenEndpoint = "https://accounts.spotify.com/api/token";
 const authorizationEndpoint = "https://accounts.spotify.com/authorize";
-const scope = 'user-read-playback-state user-modify-playback-state';
+const scope = 'user-read-playback-state user-modify-playback-state user-read-private user-read-email';
 
 let authWindow;
 

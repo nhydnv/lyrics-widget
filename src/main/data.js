@@ -72,12 +72,18 @@ const openWebPlayer = async (event) => {
 const getLyrics = async (event, id) => {
   const lyricsButton = 'button[data-testid="lyrics-button"]';
 
+
   // Check if the track has lyrics, if yes, open lyrics tab
-  const hasLyrics = await page.$eval(
-    lyricsButton,
-    el => !el.disabled,
-  ).catch(() => false);
-  if (!hasLyrics) return null;
+  let elHandler;
+  try {
+    elHandler = await page.waitForSelector(lyricsButton, { timeout: 20_000 });
+  } catch {
+    return null;  // Timeout
+  }
+  const hasLyrics = await elHandler.evaluate(el => !el.disabled);
+  if (!hasLyrics) {
+    return null;
+  }
 
   // Check that lyrics tab is not already opened
   const isActive = await page.$eval(
@@ -95,6 +101,8 @@ const getLyrics = async (event, id) => {
 }
 
 const getPlaybackState = async (event, token) => requestData(token, "/me/player");
+
+const getCurrentUser = async (event, token) => requestData(token, "/me");
 
 const requestData = async (token, path) => {
   if (safeStorage.isEncryptionAvailable()) {
@@ -170,4 +178,5 @@ module.exports = {
   getLyrics,
   startPlayback,
   pausePlayback,
+  getCurrentUser,
 }

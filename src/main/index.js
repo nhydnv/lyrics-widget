@@ -6,7 +6,7 @@ const { getAuthWindow, closeAuthWindow, redirectToSpotifyAuthorize,
         getToken, refreshToken
 } = require('./authorization');
 const { getPlaybackState, openWebPlayer, getLyrics, startPlayback, 
-        pausePlayback } = require('./data.js');
+        pausePlayback, getCurrentUser } = require('./data.js');
 const { redirectUri } = require('./config');
 
 let mainWindow;
@@ -91,6 +91,7 @@ app.whenReady().then(() => {
   ipcMain.handle('get-playback-state', getPlaybackState);
   ipcMain.on('start-playback', startPlayback);
   ipcMain.on('pause-playback', pausePlayback);
+  ipcMain.handle('get-current-user', getCurrentUser);
 
   // Web scraping
   ipcMain.handle('open-web-player', openWebPlayer);

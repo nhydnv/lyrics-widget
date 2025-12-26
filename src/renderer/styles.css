@@ -236,6 +236,16 @@ title-bar {
   visibility: hidden;
 }
 
+#playback-controls {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 5%;
+  align-items: center;
+  flex: 0 0 auto;
+  padding-bottom: 5px;
+}
+
 .playback-btn {
   background-color: transparent;
   border: 0;
@@ -244,6 +254,11 @@ title-bar {
 
 .playback-btn:disabled {
   opacity: 0.5;
+}
+
+/* Glow on hover effect */
+.playback-btn:not(:disabled) svg:hover {
+  filter: drop-shadow(0 0 2px #ffffff);
 }
 
 /* TEMP */
