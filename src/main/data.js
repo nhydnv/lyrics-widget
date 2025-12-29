@@ -169,6 +169,9 @@ const startPlayback = async (event, token) => modifyPlayback(token, 'PUT', '/me/
 const pausePlayback = async (event, token) => modifyPlayback(token, 'PUT', '/me/player/pause');
 const skipToNext = async (event, token) => modifyPlayback(token, 'POST', '/me/player/next');
 const skipToPrevious = async (event, token) => modifyPlayback(token, 'POST', '/me/player/previous');
+const seekToPosition = async (event, token, position_ms) => {
+  modifyPlayback(token, 'PUT', `me/player/seek?position_ms=${position_ms}`);
+}
 
 const modifyPlayback = async (token, method, path) => {
   if (safeStorage.isEncryptionAvailable()) {
@@ -201,4 +204,5 @@ module.exports = {
   pausePlayback,
   skipToNext,
   skipToPrevious,
+  seekToPosition,
 }

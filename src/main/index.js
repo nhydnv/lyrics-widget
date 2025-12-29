@@ -3,10 +3,10 @@ const path = require('node:path');
 const http = require('http');
 const { readFile } = require('node:fs/promises');
 const { getAuthWindow, closeAuthWindow, redirectToSpotifyAuthorize,
-        getToken, refreshToken
-} = require('./authorization');
+        getToken, refreshToken } = require('./authorization');
 const { getPlaybackState, openWebPlayer, getLyrics, startPlayback, 
-        pausePlayback, getCurrentUser, skipToNext, skipToPrevious } = require('./data.js');
+        pausePlayback, getCurrentUser, skipToNext, skipToPrevious,
+        seekToPosition } = require('./data.js');
 const { redirectUri } = require('./config');
 
 let mainWindow;
@@ -100,6 +100,7 @@ app.whenReady().then(() => {
   ipcMain.handle('get-current-user', getCurrentUser);
   ipcMain.handle('skip-to-next', skipToNext);
   ipcMain.handle('skip-to-previous', skipToPrevious);
+  ipcMain.handle('seek-to-position', seekToPosition)
 
   // Web scraping
   ipcMain.handle('open-web-player', openWebPlayer);
