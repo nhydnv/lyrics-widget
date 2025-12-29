@@ -6,7 +6,7 @@ export const routes = {
   error: page('pages/error.html', 'pages/error.js'),
 };
 
-export async function navigateTo(route, reload=false) {
+export async function navigateTo(route, { reload = false, cache = true } = {}) {
   const container = document.getElementById("app");
 
   const pageModule = routes[route];
@@ -23,9 +23,9 @@ export async function navigateTo(route, reload=false) {
     const pageJS = await import(`./${pageModule.js}`);
     if (pageJS.init) pageJS.init();   // Call exported init()
     if (reload) window.location.reload();
-    window.localStorage.setItem('path', route);
+    if (cache) window.localStorage.setItem('path', route);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     container.innerHTML = '<p>An error occured while loading this page.</p>';
   }
 };

@@ -10,6 +10,3 @@ export const init = () => {
 
   newBtn.addEventListener("click", () => navigateTo('login'));
 }
-
-// Styling
-window.controls.setWindowOpacity(1.0);

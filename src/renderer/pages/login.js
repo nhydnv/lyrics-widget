@@ -11,10 +11,8 @@ export const init = () => {
 
   newBtn.addEventListener("click", async () => {
     authorize().then((authorized) => {
-      if (authorized) navigateTo('home', true);
-      else navigateTo('login', true);
+      if (authorized) navigateTo('home', { reload:true });
+      else navigateTo('login');
     });
   });
 }
-
-window.controls.setWindowOpacity(0.9);

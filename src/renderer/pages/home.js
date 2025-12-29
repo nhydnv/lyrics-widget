@@ -1,10 +1,13 @@
 import { currentToken } from './../authorization.js';
 import { navigateTo } from '../router.js';
 
+let halted = false;
+
 let previousTrack = "";
 let lyrics;
 let startTimes = [];
 
+let lyricsIntervalId;
 const songInfo = document.getElementById('song-info');
 const lyricPrev = document.getElementById('lyric-prev');
 const lyricMain = document.getElementById('lyric-main');
@@ -16,19 +19,18 @@ let isPlaying = false;
 let playbackModified = true;  // Flag if user modified playback using in-app controls (as opposed to Spotify's)
 let hasPremium = true;
 const playbackBtns = document.querySelectorAll('.playback-btn');
-const nextTrackBtn = document.getElementById('next-track');
 const playPauseBtn = document.getElementById('play-pause');
-const prevTrackBtn = document.getElementById('prev-track');
+const SKIP_MS = 5000;  // Milliseconds to fast forward / backward
 
 const main = async () => {
-  // Styling
-  window.controls.setWindowOpacity(0.9);
-
-  if (!currentToken.access_token) { navigateTo('error'); return; }
+  if (!currentToken.access_token) { 
+    fail();
+    return;
+  }
 
   // Check if user has Spotify Premium
-  const user = await window.api.getCurrentUser(currentToken.access_token);
-  if (!user.ok) { navigateTo('error'); return; }
+  const user = await invoke(window.api.getCurrentUser(currentToken.access_token));
+  if (!user) return;
   if (user['data']['product'] !== 'premium') {
     disablePlayback();
     hasPremium = false;
@@ -46,41 +48,59 @@ const main = async () => {
   clearInterval(intervalId);             // Stop loading animation
   enablePlayback();                      // Re-enable playback buttons
 
-  setInterval(displayLyrics, 1000);  // Poll every second to detect song changes
+  lyricsIntervalId = setInterval(displayLyrics, 1000);  // Poll every second to detect song changes
 
   // Play/pause button logic
   playPauseBtn.addEventListener('click', async () => {
     playbackModified = true;
     isPlaying = !isPlaying;
-    let response = null;
     if (!isPlaying) {
       playPauseBtn.innerHTML ='<play-button />';
-      response = await window.api.pausePlayback(currentToken.access_token);
+      playPauseBtn.title = 'Play';
+      await invoke(window.api.pausePlayback(currentToken.access_token));
     } else {
+      playPauseBtn.title = 'Pause';
       playPauseBtn.innerHTML ='<pause-button />';
-      response = await window.api.startPlayback(currentToken.access_token);
+      await invoke(window.api.startPlayback(currentToken.access_token));
     }
-    if (!response.ok) { navigateTo('error'); return; }
   });
 
   // Skip to previous track
+  const prevTrackBtn = document.getElementById('prev-track');
   prevTrackBtn.addEventListener('click', async () => {
-    const response = await window.api.skipToPrevious(currentToken.access_token);
-    if (!response.ok) { navigateTo('error'); return; }
+    await invoke(window.api.skipToPrevious(currentToken.access_token));
     displayLyrics();
   });
 
   // Skip to next track
+  const nextTrackBtn = document.getElementById('next-track');
   nextTrackBtn.addEventListener('click', async () => {
-    const response = await window.api.skipToNext(currentToken.access_token);
-    if (!response.ok) { navigateTo('error'); return; }
+    await invoke(window.api.skipToNext(currentToken.access_token));
     displayLyrics();
   });
-}
 
-const displayLyrics = async () => {
-  const response = await window.api.getPlaybackState(currentToken.access_token);
-  if (!response.ok) throw new Error(`Response status: ${response.status}`);
+  // Rewind
+  const rewindBtn = document.getElementById('rewind');
+  rewindBtn.addEventListener('click', async () => {
+    const response = await invoke(window.api.getPlaybackState(currentToken.access_token));
+    if (!response) return;
+    const pos = response['data']['progress_ms'] - SKIP_MS;
+    await invoke(window.api.seekToPosition(currentToken.access_token, Math.max(0, pos)));
+  });
+
+  // Fast forward
+  const fastForwardBtn = document.getElementById('fast-forward');
+  fastForwardBtn.addEventListener('click', async () => {
+    const response = await invoke(window.api.getPlaybackState(currentToken.access_token));
+    if (!response) return;
+    const pos = response['data']['progress_ms'] + SKIP_MS;
+    await invoke(window.api.seekToPosition(currentToken.access_token, pos));
+  });
+};
+
+const displayLyrics = async () => {  
+  const response = await invoke(window.api.getPlaybackState(currentToken.access_token));
+  if (!response) return;
 
   const state = response['data'];
   if (state && !state['device']['is_private_session']) {
@@ -96,6 +116,7 @@ const displayLyrics = async () => {
       // Update isPlaying if playback modified using Spotify controls
       if (!playbackModified) isPlaying = state['is_playing'];
       playPauseBtn.innerHTML = isPlaying ? '<pause-button />' : '<play-button />';
+      playPauseBtn.title = isPlaying ? 'Pause' : 'Play';
     } 
     playbackModified = false;
 
@@ -146,7 +167,7 @@ const displayLyrics = async () => {
     else lyricMain.textContent = '\u{266A} Start playing something \u{266A}';
     lyricNext.textContent = '';
   }
-}
+};
 
 // Find the lyrics position the user is currently at using a binary search approach
 const findLyricsPosition = (startTimes, currentTime) => {
@@ -193,13 +214,41 @@ const clampSongWidth = () => {
   } else {
     scrollContainer.classList.remove('scroll-x');
   }
-}
+};
 
 // Playback buttons enable/disable
 const enablePlayback = () => { 
   if (hasPremium) playbackBtns.forEach(btn => btn.disabled = false);
-}
+};
 
 const disablePlayback = () => playbackBtns.forEach(btn => btn.disabled = true);
+
+const invoke = async (promise) => {
+  if (halted) return null;
+
+  const response = await promise;
+  if (!response?.ok) {
+    fail();
+    return null;
+  } else {
+    return response;
+  }
+};
+
+const fail = () => {
+  if (halted) return;
+  halted = true;
+  navigateTo('error', { reload:false, cache:false });
+
+  // Cleanup
+  if (lyricsIntervalId) {
+    // Clear interval
+    clearInterval(lyricsIntervalId);
+  }
+  playbackBtns.forEach(btn => {
+    // Remove all event listeners by cloning the nodes
+    btn.replaceWith(btn.cloneNode(true)); 
+  });
+}
 
 main();

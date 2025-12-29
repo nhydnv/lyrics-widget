@@ -27,5 +27,5 @@ contextBridge.exposeInMainWorld('api', {
   pausePlayback: (token) => ipcRenderer.invoke('pause-playback', token),
   skipToNext: (token) => ipcRenderer.invoke('skip-to-next', token),
   skipToPrevious: (token) => ipcRenderer.invoke('skip-to-previous', token),
-  seekToPosition: (token) => ipcRenderer.invoke('seek-to-position', token),
+  seekToPosition: (token, position_ms) => ipcRenderer.invoke('seek-to-position', token, position_ms),
 });
