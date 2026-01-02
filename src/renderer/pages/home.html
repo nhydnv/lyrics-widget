@@ -20,33 +20,37 @@
     <p id="lyric-next" class="lyric"></p>
     <p id="unsynced-msg">Lyrics aren't synced to the song yet.</p>
   </div>
-  <div id="playback-controls">
-    <button type="button" id="rewind" class="playback-btn" title="Rewind" disabled>
-      <svg width="13" height="9" viewBox="0 0 13 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 4.33012L12.5 8.66025L12.5 -3.33786e-06L5 4.33012Z" fill="white"/>
-        <path d="M0 4.33012L7.5 8.66025L7.5 -3.33786e-06L0 4.33012Z" fill="white"/>
-      </svg>
-    </button>
-    <button type="button" id="prev-track" class="playback-btn" title="Previous track" disabled>
-      <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 5L10.5 9.33013L10.5 0.669873L3 5Z" fill="white"/>
-        <rect width="3" height="8.57143" transform="matrix(-1 0 0 1 3 0.714279)" fill="white"/>
-      </svg>
-    </button>
-    <button type="button" id="play-pause" class="playback-btn" title="Play" disabled>
-      <play-button></play-button>
-    </button>
-    <button type="button" id="next-track" class="playback-btn" title="Next track" disabled>
-      <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 5L2.5 9.33013L2.5 0.669873L10 5Z" fill="white"/>
-        <rect x="10" y="0.714279" width="3" height="8.57143" fill="white"/>
-      </svg>
-    </button>
-    <button type="button" id="fast-forward" class="playback-btn" title="Fast forward" disabled>
-      <svg width="13" height="9" viewBox="0 0 13 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M7.5 4.33012L0 8.66025L0 -3.33786e-06L7.5 4.33012Z" fill="white"/>
-        <path d="M12.5 4.33012L5 8.66025L5 -3.33786e-06L12.5 4.33012Z" fill="white"/>
-      </svg>
-    </button>
+  <!-- Do not remove this div else you die -->
+  <div id="playback-container">
+    <div id="playback-controls">
+      <button type="button" id="rewind" class="playback-btn" title="Rewind" disabled>
+        <svg width="13" height="9" viewBox="0 0 13 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 4.33012L12.5 8.66025L12.5 -3.33786e-06L5 4.33012Z" fill="white"/>
+          <path d="M0 4.33012L7.5 8.66025L7.5 -3.33786e-06L0 4.33012Z" fill="white"/>
+        </svg>
+      </button>
+      <button type="button" id="prev-track" class="playback-btn" title="Previous track" disabled>
+        <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 5L10.5 9.33013L10.5 0.669873L3 5Z" fill="white"/>
+          <rect width="3" height="8.57143" transform="matrix(-1 0 0 1 3 0.714279)" fill="white"/>
+        </svg>
+      </button>
+      <button type="button" id="play-pause" class="playback-btn" title="Play" disabled>
+        <play-button></play-button>
+      </button>
+      <button type="button" id="next-track" class="playback-btn" title="Next track" disabled>
+        <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 5L2.5 9.33013L2.5 0.669873L10 5Z" fill="white"/>
+          <rect x="10" y="0.714279" width="3" height="8.57143" fill="white"/>
+        </svg>
+      </button>
+      <button type="button" id="fast-forward" class="playback-btn" title="Fast forward" disabled>
+        <svg width="13" height="9" viewBox="0 0 13 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7.5 4.33012L0 8.66025L0 -3.33786e-06L7.5 4.33012Z" fill="white"/>
+          <path d="M12.5 4.33012L5 8.66025L5 -3.33786e-06L12.5 4.33012Z" fill="white"/>
+        </svg>
+      </button>
+    </div>
+    <div id="progress-bar"></div>
   </div>
 </div>

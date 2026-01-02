@@ -8,6 +8,7 @@ let lyrics;
 let startTimes = [];
 
 let lyricsIntervalId;
+const LYRICS_INTERVAL_MS = 500;
 const songInfo = document.getElementById('song-info');
 const lyricPrev = document.getElementById('lyric-prev');
 const lyricMain = document.getElementById('lyric-main');
@@ -22,18 +23,25 @@ const playbackBtns = document.querySelectorAll('.playback-btn');
 const playPauseBtn = document.getElementById('play-pause');
 const SKIP_MS = 5000;  // Milliseconds to fast forward / backward
 
+// Progress bar logic
+const progressBar = document.getElementById('progress-bar');
+const PROGRESS_BAR_WIDTH = document.getElementById('home-page').offsetWidth;
+let trackProgressMs = 0;     // Current track progress
+let playbackProgressMs = 0;  // Overall playback progress
+let trackDurationMs = 0;     // Track duration
+let progressId = null;
+
 const main = async () => {
   if (!currentToken.access_token) { 
     fail();
     return;
   }
 
-  // Check if user has Spotify Premium
-  const user = await invoke(window.api.getCurrentUser(currentToken.access_token));
-  if (!user) return;
-  if (user['data']['product'] !== 'premium') {
+  // Disable playback controls if user does not have Spotify Premium
+  const sub = await getSubscription();
+  if (!sub || sub !== 'premium') {
     disablePlayback();
-    hasPremium = false;
+    hasPremium = false;``
   }
 
   // Loading "animation" while Puppeteer opens the web player
@@ -48,7 +56,7 @@ const main = async () => {
   clearInterval(intervalId);             // Stop loading animation
   enablePlayback();                      // Re-enable playback buttons
 
-  lyricsIntervalId = setInterval(displayLyrics, 1000);  // Poll every second to detect song changes
+  lyricsIntervalId = setInterval(displayLyrics, LYRICS_INTERVAL_MS);  // Poll every 500ms to detect song changes
 
   // Play/pause button logic
   playPauseBtn.addEventListener('click', async () => {
@@ -84,7 +92,8 @@ const main = async () => {
   rewindBtn.addEventListener('click', async () => {
     const response = await invoke(window.api.getPlaybackState(currentToken.access_token));
     if (!response) return;
-    const pos = response['data']['progress_ms'] - SKIP_MS;
+    const state = response['data'];
+    const pos = state['progress_ms'] - SKIP_MS;
     await invoke(window.api.seekToPosition(currentToken.access_token, Math.max(0, pos)));
   });
 
@@ -93,7 +102,8 @@ const main = async () => {
   fastForwardBtn.addEventListener('click', async () => {
     const response = await invoke(window.api.getPlaybackState(currentToken.access_token));
     if (!response) return;
-    const pos = response['data']['progress_ms'] + SKIP_MS;
+    const state = response['data'];
+    const pos = state['progress_ms'] + SKIP_MS;
     await invoke(window.api.seekToPosition(currentToken.access_token, pos));
   });
 };
@@ -104,19 +114,19 @@ const displayLyrics = async () => {
 
   const state = response['data'];
   if (state && !state['device']['is_private_session']) {
-    enablePlayback();
     const trackName = state['item']['name'];
     const trackId = state['item']['id'];
     const artists = state['item']['artists'].map(artist => artist['name']);
 
+    enablePlayback();     // Enable playback buttons
+    syncProgress(state);  // Update progress bar
+
+    // On playback change
     if (
-      playbackModified ||               // Playback modified using in-app controls
+      playbackModified ||                // Playback modified using in-app controls
       isPlaying !== state['is_playing']  // Playback modified using Spotify controls
     ) {
-      // Update isPlaying if playback modified using Spotify controls
-      if (!playbackModified) isPlaying = state['is_playing'];
-      playPauseBtn.innerHTML = isPlaying ? '<pause-button />' : '<play-button />';
-      playPauseBtn.title = isPlaying ? 'Pause' : 'Play';
+      onPlaybackChange(state);
     } 
     playbackModified = false;
 
@@ -216,12 +226,58 @@ const clampSongWidth = () => {
   }
 };
 
+// Get user's Spotify subscription
+const getSubscription = async () => {
+  const user = await invoke(window.api.getCurrentUser(currentToken.access_token));
+  if (!user) return null;
+  return user['data']['product'];
+}
+
+const onPlaybackChange = (state) => {
+  // Update isPlaying if playback modified using Spotify controls
+  if (!playbackModified) isPlaying = state['is_playing'];
+  if (isPlaying) {
+    playPauseBtn.innerHTML = '<pause-button />';
+    playPauseBtn.title = 'Pause';
+    startProgress();
+  } else {
+    playPauseBtn.innerHTML = '<play-button />';
+    playPauseBtn.title = 'Play';
+    stopProgress();
+  }
+};
+
 // Playback buttons enable/disable
 const enablePlayback = () => { 
   if (hasPremium) playbackBtns.forEach(btn => btn.disabled = false);
 };
 
 const disablePlayback = () => playbackBtns.forEach(btn => btn.disabled = true);
+
+// Sync progress every LYRICS_INTERVAL_MS, otherwise estimate progress
+const syncProgress = (state) => {
+  trackProgressMs = state['progress_ms'];
+  playbackProgressMs = performance.now();
+  trackDurationMs = state['item']['duration_ms'];
+};
+
+const renderProgress = () => {
+  if (!isPlaying) return;  // Safeguard
+
+  // Estimate progress
+  const elapsed = performance.now() - playbackProgressMs;  
+  const currentMs = trackProgressMs + elapsed;
+  progressBar.style.width = `${Math.min(currentMs / trackDurationMs, 1) * PROGRESS_BAR_WIDTH}px`;
+
+  progressId = requestAnimationFrame(renderProgress);
+};
+
+const startProgress = () => {
+  cancelAnimationFrame(progressId);
+  progressId = requestAnimationFrame(renderProgress);
+};
+
+const stopProgress = () => cancelAnimationFrame(progressId);
 
 const invoke = async (promise) => {
   if (halted) return null;
@@ -241,10 +297,9 @@ const fail = () => {
   navigateTo('error', { reload:false, cache:false });
 
   // Cleanup
-  if (lyricsIntervalId) {
-    // Clear interval
-    clearInterval(lyricsIntervalId);
-  }
+  // Clear intervals
+  if (lyricsIntervalId) clearInterval(lyricsIntervalId);
+  stopProgress();
   playbackBtns.forEach(btn => {
     // Remove all event listeners by cloning the nodes
     btn.replaceWith(btn.cloneNode(true)); 

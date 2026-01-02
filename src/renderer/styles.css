@@ -156,7 +156,7 @@ title-bar {
   background-color: rgb(25, 25, 25);
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   overflow: hidden;
   p {
@@ -243,14 +243,20 @@ title-bar {
   margin-top: 5px;
 }
 
+#playback-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 6px;
+}
+ 
 #playback-controls {
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
-  gap: 20%;
-  align-items: center;
-  flex: 0 0 auto;
-  padding-bottom: 5px;
+  gap: 16px;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 .playback-btn {
@@ -268,11 +274,6 @@ title-bar {
   filter: drop-shadow(0 0 3px #ffffff);
 }
 
-/* TEMP */
-#home-page #settings {
-  height: 10px;
-}
-
 #home-page title-bar {
   position: absolute;
   top: 0;
@@ -288,6 +289,17 @@ title-bar {
 #home-page .title-bar button:hover {
   background-color: rgba(0, 0, 0, 0.5);
   color: white;
+}
+
+#home-page #progress-bar {
+  width: 0%;
+  height: 3px;
+  background-color: white;
+}
+
+/* TEMP */
+#home-page #settings {
+  height: 10px;
 }
 
 /* ---------- Error page ---------- */
