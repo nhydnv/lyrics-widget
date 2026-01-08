@@ -34,7 +34,8 @@ let playbackProgressMs = 0;  // Overall playback progress
 let trackDurationMs = 0;     // Track duration
 let progressId = null;
 
-const fontClasses = FONTS.map(f => `font-${f.id}`);
+const fontClasses = [];
+Object.keys(FONTS).forEach(f => fontClasses.push(`font-${f}`));
 let currentFont = window.localStorage.getItem('font') || 'epilogue';
 
 const main = async () => {
@@ -118,7 +119,7 @@ const main = async () => {
 
   const editFontBtn = document.getElementById('edit-font');
   editFontBtn.addEventListener('click', () => {
-
+    showSelectedFont();
   });
 };
 
@@ -240,13 +241,24 @@ const clampSongWidth = () => {
   }
 };
 
-const showInfo = (msg) => {
+const showInfo = (msg, fade=false) => {
   infoMsg.textContent = msg;
-  infoMsg.style.display = 'block';
+  infoMsg.style.visibility = 'visible';
+  if (fade) {
+    infoMsg.classList.remove('fade-out');
+
+    requestAnimationFrame(() => {
+      infoMsg.classList.add('fade-out');
+    });
+
+    infoMsg.classList.remove('fade-out');
+  } else {
+    infoMsg.classList.remove('fade-out');
+  }
 }
 
 const hideInfo = () => {
-  infoMsg.style.display = 'none';
+  infoMsg.style.visibility = 'hidden';
 }
 
 // Get user's Spotify subscription
@@ -304,20 +316,26 @@ const stopProgress = () => cancelAnimationFrame(progressId);
 
 const createFontButtons = () => {
   const fontBar = document.getElementById('font-controls');
-  FONTS.forEach(f => {
+  Object.keys(FONTS).forEach(f => {
     const fontBtn = document.createElement('button');
     fontBtn.textContent = 'Aa';
-    fontBtn.classList.add('font-btn', `font-${f.id}`);
-    fontBtn.title = f.family;
+    fontBtn.classList.add('font-btn', `font-${f}`);
+    fontBtn.title = FONTS[f]['family'];
     fontBtn.addEventListener('click', () => {
-      setFont(f.id);
-      window.localStorage.setItem('font', f.id);
-      currentFont = f.id;
+      if (f !== currentFont) {
+        setFont(f);
+        showInfo('Font change applied !', true);
+        setTimeout(showSelectedFont, 2000);
+      }
+      window.localStorage.setItem('font', f);
+      currentFont = f;
     });
     fontBtn.addEventListener('mouseenter', () => {
-      setFont(f.id);
+      showSelectedFont(f);
+      setFont(f);
     });
     fontBtn.addEventListener('mouseleave', () => {
+      showSelectedFont();
       setFont(currentFont);
     });
     fontBar.appendChild(fontBtn);
@@ -328,6 +346,10 @@ const setFont = (fontId) => {
   homePage.classList.remove(...fontClasses);
   homePage.classList.add(`font-${fontId}`);
 };
+
+const showSelectedFont = (font=currentFont) => {
+  showInfo(`Selected font: ${FONTS[font]['family']}`);
+}
 
 const invoke = async (promise) => {
   if (halted) return null;

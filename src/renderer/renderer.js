@@ -3,13 +3,13 @@ import { currentToken } from './authorization.js';
 import { FONTS } from './styles/fonts.js';
 
 // Generate @font-face dynamically
-FONTS.forEach(f => {
+Object.keys(FONTS).forEach(f => {
   const newFont = new FontFace(
-    f.family,
-    `url("./../assets/fonts/${f.file}") format("truetype")`,
+    FONTS[f]['family'],
+    `url("./../assets/fonts/${FONTS[f]['file']}") format("truetype")`,
     {
-      weight: f.weight,
-      style: f.style,
+      weight: FONTS[f]['weight'],
+      style: FONTS[f]['style'],
     },
   );
   newFont.load().then(() => {

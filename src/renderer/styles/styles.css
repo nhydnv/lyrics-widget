@@ -1,3 +1,5 @@
+@import './fonts.css';
+
 :root {
   /* Fonts */
   --epilogue: "Epilogue", -apple-system, BlinkMacSystemFont, "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", "Adwaita Sans"," Cantarell", 'Ubuntu', "Roboto", "Noto", "Helvetica", "Arial", sans-serif;
@@ -23,30 +25,6 @@ body {
   margin: 0;
   padding: 0;
   display: flex;
-}
-
-.font-epilogue {
-  font-family: var(--epilogue);
-}
-
-.font-noto-mono {
-  font-family: "Noto Sans Mono", Menlo, Consolas, Monaco, "Adwaita Mono", "Liberation Mono", "Lucida Console", monospace;
-}
-
-.font-newsreader {
-  font-family: "Newsreader", 'Iowan Old Style', 'Apple Garamond', Baskerville, 'Times New Roman',' Droid Serif', Times, 'Source Serif Pro', serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-}
-
-.font-gantari {
-  font-family: "Gantari", -apple-system, BlinkMacSystemFont, "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", "Adwaita Sans"," Cantarell", 'Ubuntu', "Roboto", "Noto", "Helvetica", "Arial", sans-serif;
-}
-
-.font-playpen {
-  font-family: "Playpen Sans", -apple-system, BlinkMacSystemFont, "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", "Adwaita Sans"," Cantarell", 'Ubuntu', "Roboto", "Noto", "Helvetica", "Arial", sans-serif;
-}
-
-.font-google-code {
-  font-family: "Google Sans Code", Menlo, Consolas, Monaco, "Adwaita Mono", "Liberation Mono", "Lucida Console", monospace;
 }
 
 * button {
@@ -265,7 +243,7 @@ title-bar {
     overflow: hidden;
     white-space: nowrap;
     max-width: initial;
-    vertical-align: middle;
+    vertical-align: bottom;  /* Fixes text misalignment due to inline-block display */
   }
   /* Prevents text from being clipped due to font-style:italic */
   #song-info-container::after {
@@ -285,9 +263,15 @@ title-bar {
 
 #info-msg {
   font-size: 0.4em;
-  display: none;
+  visibility: hidden;
   text-align: center;
   margin-top: 5px;
+  opacity: 1;
+}
+
+#info-msg.fade-out {
+  transition: opacity 2s;
+  opacity: 0;
 }
 
 #controls-container {
@@ -307,8 +291,10 @@ title-bar {
 }
 
 #font-controls {
+  padding: 0 20px;
   display: flex;
   flex-wrap: nowrap;
+  justify-content: space-around;
 }
 
 .font-btn {
@@ -317,6 +303,7 @@ title-bar {
   border: 0;
   height: 20px;
   color: white;
+  padding: 0 5px;
 }
 
 .font-btn:hover {

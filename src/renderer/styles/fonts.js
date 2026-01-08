@@ -1,43 +1,71 @@
-export const FONTS = [
-  {
+export const FONTS = {
+  'epilogue': {
     id: 'epilogue',
     family: 'Epilogue',
     file: 'Epilogue.ttf',
     weight: '100 900',
     style: 'normal',
   },
-  {
-    id: "noto-mono",
-    family: "Noto Sans Mono",
-    file: "NotoSansMono.ttf",
-    weight: '100 900',
-    style: 'normal',
-  },
-  {
-    id: "newsreader",
-    family: "Newsreader",
-    file: "Newsreader.ttf",
-    weight: '200 800',
-    style: 'normal',
-  },
-  {
+  'gantari': {
     id: "gantari",
     family: "Gantari",
     file: "Gantari.ttf",
     weight: '100 900',
     style: 'normal',
   },
-  {
-    id: "playpen",
-    family: "Playpen Sans",
-    file: "PlaypenSans.ttf",
-    weight: '100 800',
-  },
-  {
+  'google-code': {
     id: "google-code",
     family: "Google Sans Code",
     file: "GoogleSansCode.ttf",
     weight: '300 800',
     style: 'normal',
   },
-];
+  'karla': {
+    id: "karla",
+    family: "Karla",
+    file: "Karla.ttf",
+    weight: '200 800',
+    style: 'normal',
+  },
+  'libre-franklin': {
+    id: "libre-franklin",
+    family: "Libre Franklin",
+    file: "LibreFranklin.ttf",
+    weight: '100 900',
+    style: 'normal',
+  },
+  'lora': {
+    id: "lora",
+    family: "Lora",
+    file: "Lora.ttf",
+    weight: '400 700',
+    style: 'normal',
+  },
+  'newsreader': {
+    id: "newsreader",
+    family: "Newsreader",
+    file: "Newsreader.ttf",
+    weight: '200 800',
+    style: 'normal',
+  },
+  'noto-mono': {
+    id: "noto-mono",
+    family: "Noto Sans Mono",
+    file: "NotoSansMono.ttf",
+    weight: '100 900',
+    style: 'normal',
+  },
+  'playpen': {
+    id: "playpen",
+    family: "Playpen Sans",
+    file: "PlaypenSans.ttf",
+    weight: '100 800',
+  },
+  'playwrite-gbs': {
+    id: "playwrite-gbs",
+    family: "Playwrite GBS",
+    file: "PlaywriteGBS.ttf",
+    weight: '100 400',
+    style: 'normal',
+  }
+};
