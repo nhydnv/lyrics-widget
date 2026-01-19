@@ -3,11 +3,17 @@
   <div id="overlay"></div>
   <title-bar></title-bar>
   <div id="settings-bar">
-    <button title="Edit font" id="edit-font" class="edit-btn">Aa</button>
-    <button title="Edit theme" id="edit-theme" class="edit-btn">
+    <button title="Change font" id="edit-font" class="edit-btn">Aa</button>
+    <button title="Change theme" id="edit-theme" class="edit-btn">
       <theme-button></theme-button>
     </button>
+    <button title="Change opacity" id="edit-opacity" class="edit-btn">
+      <opacity-button></opacity-button>
+    </button>
   </div>
+  <button title="Log out" id="log-out-btn">
+    <log-out-button></log-out-button>
+  </button>
   <div id="now-playing">
     <p>
       <span>Now playing:&nbsp;</span>
@@ -27,8 +33,13 @@
   </div>
   <!-- Do not remove this div else you die -->
   <div id="controls-container">
-    <div id="font-controls"></div>
-    <div id="theme-controls"></div>
+    <div id="font-controls" class="edit-controls"></div>
+    <div id="theme-controls" class="edit-controls"></div>
+    <div id="opacity-controls" class="edit-controls">
+      <p>0%</p>
+      <input type="range" min="0" max="100" value="90" id="opacity-slider">
+      <p>100%</p>
+    </div>
     <div id="playback-controls">
       <button type="button" id="rewind" class="playback-btn" title="Rewind" disabled>
         <svg width="13" height="9" viewBox="0 0 13 9" fill="none" xmlns="http://www.w3.org/2000/svg">

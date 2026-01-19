@@ -9,6 +9,9 @@
   --muted-pink: rgba(206, 116, 131, 1);
   --strong-red: rgba(255, 15, 15, 1);
   --dark-cool-purple: rgba(6, 0, 73, 0.4);
+
+  /* Opacity */
+  --background-opacity: 0.9;
 }
 
 html, body {
@@ -25,7 +28,7 @@ body {
   display: flex;
 }
 
-* button {
+* button, #opacity-slider {
   app-region: no-drag;
 }
 
@@ -71,13 +74,22 @@ title-bar {
 }
 
 /* ---------- Login page ---------- */
+/* Login page's background image */
+#login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--background-opacity);
+  z-index: -1;
+  background-image: url("./../../assets/images/login-background.png");
+}
+
 #login-page {
   font-family: var(--default-font);
   display: grid;
   grid-template-rows: 1fr 4fr;
   justify-items: center;
   align-items: center;
-  background-image: url("./../../assets/images/login-background.png");
   border: 2px solid var(--light-muted-red);
   border-radius: 9px;
 }
@@ -145,6 +157,8 @@ title-bar {
   justify-content: space-between;
   align-items: center;
   overflow: hidden;
+  border: 1px solid var(--theme-text-secondary);
+  border-radius: 8px;
   p {
     margin: 0 20px;
     color: var(--theme-text-primary);
@@ -166,6 +180,7 @@ title-bar {
   background-image: var(--theme-background-image);
   background-position: center center;
   filter: blur(2px);
+  opacity: var(--background-opacity);
 }
 
 #home-page #overlay {
@@ -197,8 +212,20 @@ title-bar {
   font-size: 0.6em;
 }
 
-#settings-bar button:hover, .theme-btn:hover {
+#settings-bar button:hover, .theme-btn:hover, #log-out-btn:hover {
   opacity: 0.6;
+}
+
+#log-out-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border: 0;
+  background: transparent;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 3px 5px;
 }
 
 #lyrics {
@@ -287,14 +314,13 @@ title-bar {
   width: 100%;
 }
  
-#font-controls, #theme-controls {
+.edit-controls {
   padding: 0 20px;
   display: none;
   flex-wrap: nowrap;
   justify-content: space-around;
-}
-
-#font-controls {
+  align-items: center;
+  height: 20px;
   margin-bottom: 4px;
 }
 
@@ -311,17 +337,35 @@ title-bar {
   text-decoration: underline;
 }
 
-#theme-controls {
-  margin-bottom: 6px;
-}
-
 .theme-btn {
   background: transparent;
   border: 0;
 }
 
+#opacity-slider {
+  appearance: none;  /* Overrides default styling */
+  background: var(--theme-text-secondary);
+  color: var(--theme-text-primary);
+  height: 4px;
+  width: 85%;
+}
+
+#opacity-slider::-webkit-slider-thumb {
+  appearance: none;  /* Overrides default styling */
+  background: var(--theme-text-primary);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;  /* Make it a circle */
+  cursor: pointer;
+}
+
+#opacity-controls p {
+  margin: 0 5px;
+  font-size: 0.5em;
+}
+
 #playback-controls {
-  display: flex; 
+  display: flex;  
   flex-wrap: nowrap;
   justify-content: center;
   gap: 16px;
@@ -362,7 +406,7 @@ title-bar {
 
 #home-page #progress-bar {
   width: 0%;
-  height: 3px;
+  height: 2px;
   background-color: var(--theme-text-primary);
 }
 
@@ -370,11 +414,15 @@ title-bar {
 #error-page {
   font-family: var(--default-font);
   position: relative;  /* Create positioning context */
+  overflow: hidden;
+  border: 2px solid #1c17a9;
+  border-radius: 8px;
 }
 
 /* Using background-image makes the image's colours not render correctly
 for some fuckass reason so the bg img is embedded as HTML */
 #error-page .bg-img {
+  opacity: calc(var(--background-opacity) / 2);
   position: absolute;
   z-index: -1;
 }

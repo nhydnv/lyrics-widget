@@ -36,6 +36,8 @@ let playbackProgressMs = 0;  // Overall playback progress
 let trackDurationMs = 0;     // Track duration
 let progressId = null;
 
+const logOutBtn = document.getElementById('log-out-btn');
+
 // Controls bar (font, theme, playback)
 const controls = {
   font: {
@@ -48,11 +50,17 @@ const controls = {
     bits: 1 << 1,
     selected: window.localStorage.getItem('theme') || 'dark',
   },
+  opacity: {
+    element: document.getElementById('opacity-controls'),
+    bits: 1 << 2,
+  },
   playback: {
     element: document.getElementById('playback-controls'),
-    bits: 1 << 2,
+    bits: 1 << 3,  // ALWAYS THE FIRST BIT
   }
 };
+
+const opacitySlider = document.getElementById('opacity-slider');
 
 // Bit flag indicating which control mode user is in
 let isEditing = 0;
@@ -140,6 +148,7 @@ const main = async () => {
     await invoke(window.api.seekToPosition(currentToken.access_token, pos));
   });
 
+  // Edit buttons in the settings bar
   const editBtns = document.querySelectorAll('.edit-btn');
   editBtns.forEach(btn => btn.addEventListener('click', () => {
     // e.g. 'theme' from 'edit-theme'
@@ -156,6 +165,19 @@ const main = async () => {
       resetInfo();
     }
   }));
+
+  // Log out button
+  logOutBtn.addEventListener('click', () => {
+    navigateTo('login');
+    cleanUp();
+  });
+
+  // Opacity slider
+  opacitySlider.addEventListener('input', () => {
+    document.documentElement.style.setProperty(
+      '--background-opacity', Number(opacitySlider.value) / 100);
+    showSelected('opacity');
+  });
 };
 
 const displayLyrics = async () => {  
@@ -362,6 +384,11 @@ const displayControls = (control) => {
     controls[c]['element'].style.display = 'none';
   });
   controls[control]['element'].style.display = 'flex';
+  if (control === 'playback') {
+    logOutBtn.style.visibility = 'visible';
+  } else {
+    logOutBtn.style.visibility = 'hidden';
+  }
 };
 
 const createFontButtons = () => {
@@ -412,6 +439,8 @@ const showSelected = (type, selected) => {
     showInfo(`Selected font: ${FONTS[selected]['name']}`);
   } else if (type === 'theme') {
     showInfo(`Selected theme: ${THEMES[selected]['name']}`);
+  } else if (type === 'opacity') {
+    showInfo(`Opacity: ${opacitySlider.value}%`)
   }
 }
 
@@ -447,6 +476,14 @@ const setTheme = async (themeId) => {
   const editThemeIcon = document.querySelector('theme-button');
   editThemeIcon.setFill(THEMES[themeId]['background']);
   editThemeIcon.setStroke(THEMES[themeId]['text-primary']);
+
+  // Apply theme to edit opacity button
+  const editOpacityIcon = document.querySelector('opacity-button');
+  editOpacityIcon.setStroke(THEMES[themeId]['text-primary']);
+
+  // Apply theme to log out button
+  const logOutIcon = document.querySelector('log-out-button');
+  logOutIcon.setFill(THEMES[themeId]['text-secondary']);
 
   // Album theme sets the background image to the album's cover art
   if (themeId === 'album') {
@@ -490,6 +527,10 @@ const fail = () => {
   navigateTo('error', { reload:false, cache:false });
 
   // Cleanup
+  cleanUp();
+}
+
+const cleanUp = () => {
   // Clear intervals
   if (lyricsIntervalId) clearInterval(lyricsIntervalId);
   stopProgress();
@@ -500,6 +541,8 @@ const fail = () => {
     ...document.querySelectorAll('.edit-btn'),
     ...document.querySelectorAll('.font-btn'),
     ...document.querySelectorAll('.theme-btn'),
+    logOutBtn,
+    opacitySlider,
   ];
   nodes.forEach(node => {
     node.replaceWith(node.cloneNode(true));

@@ -10,7 +10,7 @@ export const THEMES = {
     'Dark', 
     'white', 
     '#a0a0a0', 
-    '#191919'
+    '#121212'
   ),
   light: theme(
     'Light', 

@@ -25,11 +25,11 @@ const createWindow = () => {
     height: MAIN_WINDOW_HEIGHT,
     titleBarStyle: 'hidden',  // Remove the default title bar
     resizable: false,
+    transparent: true,
     webPreferences: {
       contextIsolation: true,
       preload: path.join(__dirname, '../preload/preload.js'),
     },
-    opacity: 0.9,
     frame: false,
   });
 
@@ -73,17 +73,12 @@ const loadPage = async (event, relativePath) => {
   return readFile(fullPath, "utf8");
 }
 
-const setWindowOpacity = (event, value) => {
-  if (mainWindow) mainWindow.setOpacity(value);
-}
-
 // Create the main window
 app.whenReady().then(() => {
 
   // Window controls
   ipcMain.on('close-window', closeWindow);
   ipcMain.on('minimize-window', minimizeWindow);
-  ipcMain.on('set-window-opacity', setWindowOpacity);
 
   // Spotify OAuth
   ipcMain.on('close-auth-window', closeAuthWindow);
@@ -91,6 +86,7 @@ app.whenReady().then(() => {
   ipcMain.handle('get-token', getToken);
   ipcMain.handle('refresh-token', refreshToken);
 
+  // Page load
   ipcMain.handle('load-page', loadPage);
 
   // API calls
