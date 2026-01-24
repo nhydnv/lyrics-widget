@@ -227,6 +227,8 @@ title-bar {
   button {
     border: 0;
     padding: 0;
+    color: var(--theme-text-secondary);
+    font-size: 1.1em;
     background: transparent;
     width: 20px;
     height: 20px;
@@ -234,6 +236,10 @@ title-bar {
     align-items: center;
     justify-content: center;
   }
+}
+
+#action-bar #corner-btn {
+  padding-top: 3px;
 }
 
 #lyrics {

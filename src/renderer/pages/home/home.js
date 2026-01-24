@@ -57,7 +57,10 @@ const main = async () => {
   });
 
   const reloadBtn = document.getElementById('reload-btn');
-  reloadBtn.addEventListener('click', () => window.location.reload() );
+  reloadBtn.addEventListener('click', () => window.location.reload());
+
+  const cornerBtn = document.getElementById('corner-btn');
+  cornerBtn.addEventListener('click', () => window.controls.moveToBottomRight());
 
   Object.keys(controlObjs).forEach(c => {
     controlObjs[c].applySelection(getSelected(c));
@@ -475,9 +478,8 @@ const cleanUp = () => {
     ...document.querySelectorAll('.edit-btn'),
     ...document.querySelectorAll('.font-btn'),
     ...document.querySelectorAll('.theme-btn'),
-    document.getElementById('log-out-btn'),
     document.getElementById('opacity-slider'),
-    document.getElementById('reload-btn'),
+    ...document.querySelectorAll('#action-bar button'),
   ];
   nodes.forEach(node => {
     node.replaceWith(node.cloneNode(true));

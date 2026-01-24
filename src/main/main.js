@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, safeStorage } = require('electron');
+const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('node:path');
 const http = require('http');
 const { readFile } = require('node:fs/promises');
@@ -74,6 +74,17 @@ const setAlwaysOnTop = (_event, enabled) => {
   mainWindow?.setAlwaysOnTop(Boolean(enabled));
 };
 
+const moveToBottomRight = (_event) => {
+  if (!mainWindow) return;
+  const display = screen.getDisplayMatching(mainWindow.getBounds());
+  const { width, height, x, y } = display.workArea;
+
+  const newX = x + width - MAIN_WINDOW_WIDTH;
+  const newY = y + height - MAIN_WINDOW_HEIGHT;
+
+  mainWindow.setPosition(newX, newY);
+}
+
 // Create the main window
 app.whenReady().then(() => {
 
@@ -81,6 +92,7 @@ app.whenReady().then(() => {
   ipcMain.on('close-window', closeWindow);
   ipcMain.on('minimize-window', minimizeWindow);
   ipcMain.on('always-on-top', setAlwaysOnTop);
+  ipcMain.on('move-to-bottom-right', moveToBottomRight);
 
   // Spotify OAuth
   ipcMain.on('close-auth-window', closeAuthWindow);
