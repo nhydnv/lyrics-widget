@@ -37,7 +37,6 @@ const progressBar = document.getElementById('progress-bar');
 const PROGRESS_BAR_WIDTH = document.getElementById('home-page').offsetWidth;
 let trackProgressMs = 0;     // Current track progress
 let playbackProgressMs = 0;  // Overall playback progress
-let trackDurationMs = 0;     // Track duration
 let progressId = null;
 
 const controlObjs = {
@@ -212,8 +211,20 @@ const main = async () => {
   // Progress bar
   const progressHitbox = document.getElementById('progress-hitbox');
   progressHitbox.addEventListener('click', (event) => {
-    if (!progressHitbox.classList.contains(enabled)) return;
+    if (!progressHitbox.classList.contains('enabled')) return;
+
+    // Temporarily stop animation immediately
+    stopProgress();
+
     const mouseX = event.clientX;  // Mouse position relative to the viewport
+    const pos = Math.round((mouseX / PROGRESS_BAR_WIDTH) * currentTrack.duration);
+    invoke(window.api.seekToPosition(currentToken.access_token, pos));
+
+    // Sync progress and force manual repaint for a smooth progress bar
+    syncProgress(pos);
+    progressBar.style.width = `${Math.min(pos / currentTrack.duration, 1) * PROGRESS_BAR_WIDTH}px`
+
+    setTimeout(startProgress, 1000);
   });
 };
 
@@ -225,7 +236,7 @@ const displayLyrics = async () => {
   const track = createTrack(state);
   if (state && !state['device']['is_private_session']) {
     enablePlayback();     // Enable playback buttons
-    syncProgress(state);  // Update progress bar
+    syncProgress(state['progress_ms']);  // Update progress bar
 
     // On playback change
     if (
@@ -398,10 +409,9 @@ const startProgress = () => {
 const stopProgress = () => cancelAnimationFrame(progressId);
 
 // Sync progress every LYRICS_INTERVAL_MS, otherwise estimate progress
-const syncProgress = (state) => {
-  trackProgressMs = state['progress_ms'];
+const syncProgress = (progress_ms) => {
+  trackProgressMs = progress_ms;
   playbackProgressMs = performance.now();
-  trackDurationMs = state['item']['duration_ms'];
 };
 
 const renderProgress = () => {
@@ -410,7 +420,7 @@ const renderProgress = () => {
   // Estimate progress
   const elapsed = performance.now() - playbackProgressMs;  
   const currentMs = trackProgressMs + elapsed;
-  progressBar.style.width = `${Math.min(currentMs / trackDurationMs, 1) * PROGRESS_BAR_WIDTH}px`;
+  progressBar.style.width = `${Math.min(currentMs / currentTrack.duration, 1) * PROGRESS_BAR_WIDTH}px`;
 
   progressId = requestAnimationFrame(renderProgress);
 };
@@ -467,6 +477,7 @@ const cleanUp = () => {
     ...document.querySelectorAll('.theme-btn'),
     document.getElementById('log-out-btn'),
     document.getElementById('opacity-slider'),
+    document.getElementById('reload-btn'),
   ];
   nodes.forEach(node => {
     node.replaceWith(node.cloneNode(true));

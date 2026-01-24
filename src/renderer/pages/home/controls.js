@@ -81,6 +81,9 @@ class FontControl extends Control {
 
 class ThemeControl extends Control {
   #coverUrl = '';
+  #editOpacityIcon = document.querySelector('opacity-button');
+  #logOutIcon = document.querySelector('log-out-button');
+  #reloadBtn = document.querySelector('reload-button');
    
   constructor() {
     super('theme');
@@ -114,12 +117,13 @@ class ThemeControl extends Control {
     editThemeIcon.setStroke(THEMES[themeId]['text-primary']);
 
     // Apply theme to edit opacity button
-    const editOpacityIcon = document.querySelector('opacity-button');
-    editOpacityIcon.setStroke(THEMES[themeId]['text-primary']);
+    this.#editOpacityIcon.setStroke(THEMES[themeId]['text-primary']);
 
     // Apply theme to log out button
-    const logOutIcon = document.querySelector('log-out-button');
-    logOutIcon.setFill(THEMES[themeId]['text-secondary']);
+    this.#logOutIcon.setFill(THEMES[themeId]['text-secondary']);
+
+    // Apply theme to reload button
+    this.#reloadBtn.setFill(THEMES[themeId]['text-secondary']);
 
     // Album theme sets the background image to the album's cover art
     if (themeId === 'album') {

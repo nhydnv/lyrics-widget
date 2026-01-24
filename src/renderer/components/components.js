@@ -171,9 +171,40 @@ class LogOutButton extends HTMLElement {
   }
 }
 
+class ReloadButton extends HTMLElement {
+  static observedAttributes = ['fill'];
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  connectedCallback() {
+    this.render();
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    this.render();
+  }
+
+  setFill(color) {
+    this.setAttribute('fill', color);
+  }
+
+  render() {
+    const fill = this.getAttribute('fill') || 'white';
+    this.shadowRoot.innerHTML = `
+    <svg width="15" height="10" viewBox="0 0 15 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9 4.28566H11.1743L11.1735 4.27923C11.0756 3.82253 10.8839 3.38874 10.6095 3.00277C10.2012 2.42976 9.62839 1.98071 8.9595 1.70915C8.733 1.61772 8.49675 1.54772 8.256 1.50129C7.75658 1.40486 7.24192 1.40486 6.7425 1.50129C6.02477 1.64136 5.36617 1.97946 4.84875 2.47346L3.78675 1.46486C4.26539 1.00887 4.83169 0.644865 5.45475 0.392685C5.77251 0.264559 6.1029 0.16693 6.441 0.101247C7.13862 -0.0337491 7.85763 -0.0337491 8.55525 0.101247C8.89361 0.167202 9.22424 0.265069 9.54225 0.393399C10.4794 0.772056 11.2816 1.40064 11.8522 2.20346C12.2363 2.7448 12.5049 3.35277 12.6427 3.9928C12.6637 4.08923 12.675 4.1878 12.69 4.28566H15L12 7.14289L9 4.28566ZM6 5.71428H3.82575L3.8265 5.71999C4.02246 6.63557 4.58909 7.44082 5.40375 7.96149C5.80889 8.22305 6.2644 8.40562 6.744 8.49865C7.24317 8.59509 7.75758 8.59509 8.25675 8.49865C8.73627 8.40538 9.19174 8.22283 9.597 7.96149C9.79603 7.83327 9.98187 7.68737 10.152 7.52576L11.2125 8.53579C10.7336 8.99166 10.1671 9.35543 9.54375 9.60726C9.22575 9.73583 8.8935 9.83369 8.5575 9.89869C7.86014 10.0338 7.14136 10.0338 6.444 9.89869C5.09959 9.63294 3.91704 8.87825 3.14775 7.79506C2.76404 7.25413 2.49571 6.64664 2.358 6.00714C2.33775 5.91071 2.32575 5.81214 2.31075 5.71428H0L3 2.85705L6 5.71428Z" fill="${fill}"/>
+    </svg>
+    `;
+  }
+}
+
 customElements.define("title-bar", TitleBar);
 customElements.define("play-button", PlayButton);
 customElements.define("pause-button", PauseButton);
 customElements.define("theme-button", ThemeButton);
 customElements.define("opacity-button", OpacityButton);
 customElements.define("log-out-button", LogOutButton);
+customElements.define("reload-button", ReloadButton);

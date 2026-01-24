@@ -230,7 +230,6 @@ title-bar {
     background: transparent;
     width: 20px;
     height: 20px;
-    color: var(--theme-text-secondary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -415,7 +414,7 @@ title-bar {
 
 #home-page #progress-hitbox {
   position: relative;
-  height: 4px;
+  height: 6px;
   app-region: no-drag;
   #progress-track, #progress-bar {
     position: absolute;
