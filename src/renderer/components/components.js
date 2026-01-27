@@ -109,19 +109,43 @@ class CornerButton extends HTMLElement {
   #directions = [
     {
       name: 'bottom-right',
-      arrow: '↘',
+      arrow: `
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1.70711 0.292893C1.31658 -0.0976311 0.683418 -0.0976311 0.292893 0.292893C-0.0976311 0.683418 -0.0976311 1.31658 0.292893 1.70711L1 1L1.70711 0.292893ZM1 1L0.292893 1.70711L7.29289 8.70711L8 8L8.70711 7.29289L1.70711 0.292893L1 1Z" fill="currentColor"/>
+        <line x1="8" y1="2" x2="8" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M2 8L7.5 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      `,
     },
     {
       name: 'bottom-left',
-      arrow: '↙',
+      arrow: `
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.70711 1.70711C9.09763 1.31658 9.09763 0.683418 8.70711 0.292893C8.31658 -0.0976311 7.68342 -0.0976311 7.29289 0.292893L8 1L8.70711 1.70711ZM8 1L7.29289 0.292893L0.292893 7.29289L1 8L1.70711 8.70711L8.70711 1.70711L8 1Z" fill="currentColor"/>
+        <line x1="7" y1="8" x2="1" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M1 2L1 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      `,
     },
     {
       name: 'top-left',
-      arrow: '↖',
+      arrow: `
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7.29289 8.70711C7.68342 9.09763 8.31658 9.09763 8.70711 8.70711C9.09763 8.31658 9.09763 7.68342 8.70711 7.29289L8 8L7.29289 8.70711ZM8 8L8.70711 7.29289L1.70711 0.292893L1 1L0.292893 1.70711L7.29289 8.70711L8 8Z" fill="currentColor"/>
+        <line x1="1" y1="7" x2="1" y2="1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M7 1L1.5 1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      `,
     },
     {
       name: 'top-right',
-      arrow: '↗',
+      arrow: `
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0.292893 7.29289C-0.0976311 7.68342 -0.0976311 8.31658 0.292893 8.70711C0.683418 9.09763 1.31658 9.09763 1.70711 8.70711L1 8L0.292893 7.29289ZM1 8L1.70711 8.70711L8.70711 1.70711L8 1L7.29289 0.292893L0.292893 7.29289L1 8Z" fill="currentColor"/>
+        <line x1="2" y1="1" x2="8" y2="1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M8 7L8 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      `,
     },
   ];
 
